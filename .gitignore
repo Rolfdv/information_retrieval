@@ -129,7 +129,9 @@ dmypy.json
 .pyre/
 
 # Large data files
-data/
+indexdir/
+collection/
+msmarco-test2019-queries
 
 # IntelliJ program files
 .idea/
