@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # Large data files
-indexdir/
+dataindexdir/
 collection/
 msmarco-test2019-queries
 
