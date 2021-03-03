@@ -7,29 +7,31 @@ import time
 
 
 if __name__ == '__main__':
-    query_text = "viking"
-
     timestart = time.time()
     schema = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ix = open_dir('indexdir', schema=schema)
+    ix = open_dir('dataindexdir', schema=schema)
 
-    with ix.searcher(weighting=scoring.BM25F()) as searcher:
-        qp = QueryParser("content", ix.schema)
-        query = qp.parse(query_text)
-        results = searcher.search(query)
+    for query_text in ["viking", "knee", "chicken", "potato", "food"]:
 
-        indices = [r["title"] for r in results]
-        entries = {}
-        with open("./data/collection.tsv") as infile:
-            for line in infile:
-                if line:
-                    index, text = line.split("\t")
-                    entries[index] = text
+        with ix.searcher(weighting=scoring.BM25F()) as searcher:
+            qp = QueryParser("content", ix.schema)
+            query = qp.parse(query_text)
+            results = searcher.search(query)
 
-        if results.has_matched_terms():
-            print(results.matched_terms())
+            indices = [r["title"] for r in results]
+            entries = {}
+            with open("./data/collection.tsv") as infile:
+                for line in infile:
+                    if line:
+                        index, text = line.split("\t")
+                        entries[index] = text
 
-        for hit in results:
-            print('{:.2f}'.format(hit.score), entries[hit["title"]], end='')
+            if results.has_matched_terms():
+                print(results.matched_terms())
+
+            for hit in results:
+                print('{:.2f}'.format(hit.score), entries[hit["title"]], end='')
+
+    print(time.time() - timestart)
 
 
