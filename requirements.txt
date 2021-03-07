@@ -1,1 +1,3 @@
-whoosh
+whoosh~=2.7.4
+tqdm~=4.58.0
+numpy
