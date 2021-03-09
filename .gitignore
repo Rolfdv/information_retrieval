@@ -127,3 +127,21 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Large output files
+index/dataindexdir/
+collection/
+msmarco-test2019-queries
+
+# IntelliJ program files
+.idea/
+
+bin/
+
+ir_venv/
+
+index/indexdir/
+
+collectionandqueries/
+
+msmarco-passagetest2019-top1000.tsv/
