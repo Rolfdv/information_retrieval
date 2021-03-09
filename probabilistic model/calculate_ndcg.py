@@ -4,7 +4,7 @@ import math
 # Create for each query, for each of its relevancy ratings, the list of passages with that relevancy rating
 per_query_per_relevancy_rating_list_of_passages = {}
 
-with open("data/2019qrels-pass.txt") as inf:
+with open("../data/2019qrels-pass.txt") as inf:
     for line in inf:
         line = line.replace("\n", "")
         if line:
@@ -28,7 +28,7 @@ with open("data/2019qrels-pass.txt") as inf:
 log_base = 2
 ndcg_at_number = 10
 
-with open("results_msmarco-test2019-queries.tsv") as results_file:
+with open("../data/results_msmarco-test2019-queries.tsv") as results_file:
     for line in results_file:
         line = line.replace("\n", "")
         if line:

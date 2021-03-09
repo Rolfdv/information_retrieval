@@ -128,8 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Large data files
-dataindexdir/
+# Large output files
+index/dataindexdir/
 collection/
 msmarco-test2019-queries
 
@@ -140,7 +140,7 @@ bin/
 
 ir_venv/
 
-indexdir/
+index/indexdir/
 
 collectionandqueries/
 
