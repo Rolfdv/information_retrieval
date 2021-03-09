@@ -1,21 +1,18 @@
-from whoosh.index import create_in, open_dir
+from whoosh.index import open_dir
 from whoosh.fields import *
 from whoosh.qparser import QueryParser
-from whoosh.scoring import BM25F
 from whoosh import scoring, qparser
 from whoosh.query import Phrase
-import time
 import string
 from tqdm import tqdm
-from spellchecker import SpellChecker
 
 # Load in 100 popular boy and girl names
-with open('data/popular_names.txt') as names_file:
+with open('../data/popular_names.txt') as names_file:
     popular_names = names_file.readlines()
     popular_names = [name.replace("\n", "").lower() for name in popular_names]
 
 # Only use the 43 queries for which the TREC relevance rating is known
-with open('data/2019qrels-pass.txt') as qrels_file:
+with open('../data/2019qrels-pass.txt') as qrels_file:
     qids = set()
     for line in qrels_file:
         line = line.replace("\n", "")
@@ -25,15 +22,15 @@ with open('data/2019qrels-pass.txt') as qrels_file:
 
 
 if __name__ == '__main__':
+    # Load in the index
     schema = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ix = open_dir('dataindexdir', schema=schema)
-    spellchecker = SpellChecker()
+    ix = open_dir('../dataindexdir', schema=schema)
 
     with open("improve_OR_results_msmarco-test2019-queries.tsv", "w+") as results_file:
         with ix.searcher(weighting=scoring.BM25F()) as searcher:
             qp = QueryParser("content", ix.schema, group=qparser.OrGroup)
 
-            with open(f'data/msmarco-test2019-queries.tsv', 'r',  encoding='utf8') as qrels_file:
+            with open(f'../data/msmarco-test2019-queries.tsv', 'r', encoding='utf8') as qrels_file:
                 # for line in tqdm(qrels_file):
                 for line in tqdm(qrels_file):
                     if line:
@@ -68,15 +65,19 @@ if __name__ == '__main__':
 
                         query = qp.parse(query_text)
 
+                        # Add phrases (names) to the parsed query
                         for phrase in phrases:
                             query = query | phrase
 
+                        # Search the index for documents that match with the query
+                        # Returned 10 documents are sorted on BM25F score descendingly
                         results = searcher.search(query, limit=10)
                         indices = [(r["title"], r.score) for r in results]
 
                         for i, (title, score) in enumerate(indices):
                             indices[i] = (int(title), float('{:.2f}'.format(score)))
 
+                        # Store so we can calculate the NDCG@10 of these 10 documents later
                         results_file.write(f"{qid}\t{indices}\n")
 
 
