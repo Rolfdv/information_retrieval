@@ -1,4 +1,4 @@
-# information_retrieval
+# Core Information Retrieval Project
 
 This repository contains the code used for the Core IR assignment of team 4.
 
