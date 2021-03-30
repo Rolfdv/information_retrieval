@@ -8,6 +8,7 @@ if __name__ == '__main__':
     ixQ = open_dir('../index/testindexdir', schema=schemaQ)
 
     i = 0
+    trainingFile = open("output/crosstrain.txt", "a", newline='')
     for line in list(open("../data/2019qrels-pass.txt", encoding='utf8')):
         print(i)
         i = i+1
@@ -46,6 +47,5 @@ if __name__ == '__main__':
         bm25 = BM25Okapi(tokenized_corpus)
         tokenized_query = query.split(" ")
         score = bm25.get_scores(tokenized_query)
-        trainingFile = open("output/crosstrain.txt", "a", newline='')
         trainingFile.write(str(relevance) + ' qid:' + str(queryID) + ' 1:' + str(score[0]) + ' 2:' + str(passageLength[0]) + ' 3:' + str(queryLength) + ' #' + str(passageID) + '\n')
         trainingFile.close()
