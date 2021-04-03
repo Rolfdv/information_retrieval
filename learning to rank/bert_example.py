@@ -35,56 +35,78 @@ def bert_next_sentence(prompt, next_sentence):
     return float(probs.data[0][0]), float(probs.data[0][1])
 
 
-if __name__ == '__main__':
-    passage = "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was. The only cloud hanging over the impressive achievement of the atomic researchers and engineers is what their success truly meant; hundreds of thousands of innocent lives obliterated."
-    query = "why was the Manhatten project succesful"
-    _, _ = bert_next_sentence(query, passage)
-
-    passage = "I bought a gallon of milk."
-    query = "This afternoon I went to the store."
-    _, _ = bert_next_sentence(query, passage)
-
-    query = "In Italy, pizza served in formal settings, such as at a restaurant, is presented unsliced."
-    passage = "The sky is blue due to the shorter wavelength of blue light."
-    _, _ = bert_next_sentence(query, passage)
-
-    query = 'I like cookies !'
-    passage = 'Do you like them ?'
-    _, _ = bert_next_sentence(query, passage)
-
-
 def create_feature_file():
     model = BertForNextSentencePrediction.from_pretrained('bert-base-cased')
     tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
 
     schemaQ = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
     ixQ = open_dir('../index/testindexdir', schema=schemaQ)
+    schemaP = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
+    ixP = open_dir('../index/qrels-index', schema=schemaP)
 
     i = 0
     feature_file = open("output/bert_features.txt", "a", newline='')
     for line in list(open("../data/2019qrels-pass.txt", encoding='utf8')):
-        if i % 10000 == 0:
-            print(i)
-        i = i+1
         queryID = line.split(' ')[0]
-        passageID = int(line.split(' ')[2])
+        passageID = line.split(' ')[2]
+        relevance = int(line.split(' ')[3])
+
         qp = QueryParser('title', schema=ixQ.schema)
         q = qp.parse(queryID)
+
+        pp = QueryParser('title', schema=ixP.schema)
+        p = qp.parse(passageID)
 
         with ixQ.searcher() as s:
             results = s.search(q)
             query = results[0].get('content')
 
-        # Get passage
+        with ixP.searcher() as s:
+            results = s.search(p)
+            passage = results[0].get('content')
 
         # Encode prompt (query) and next_sentence (passage)
-        encoded = tokenizer.encode_plus(prompt, text_pair=next_sentence, return_tensors='pt')
+        encoded = tokenizer.encode_plus(query, text_pair=passage, return_tensors='pt')
         # We only need output tensor with relationships
         seq_relationship_logits = model(**encoded)[0]
         # We need Softmax to get probabilities. [P(continue), P(random)]
         probs = softmax(seq_relationship_logits, dim=1)
 
-        prob_continue = float(probs.data[0][0])
-        prob_random = float(probs.data[0][1])
-        feature_file.write('qid:' + str(queryID) + ' pid:' + str(passageID) + ' 1:' + prob_continue + ' 2:' + prob_random + '\n')
+        prob_continue = round(float(probs.data[0][0]), 4)
+        prob_random = round(float(probs.data[0][1]), 4)
+
+        if i % 10 == 0:
+            print(i)
+            print('Prompt: ' + query)
+            print('Next: ' + passage)
+            print('Chance continuation: ' + str(prob_continue))
+            print('Chance random: ' + str(prob_random))
+            print('Relevancy rating: ' + str(relevance))
+        i = i+1
+
+        feature_file.write('qid:' + str(queryID) + ' pid:' + str(passageID) + ' 1:' + str(prob_continue) + ' 2:' + str(prob_random) + '\n')
     feature_file.close()
+
+
+if __name__ == '__main__':
+    # passage = "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was. The only cloud hanging over the impressive achievement of the atomic researchers and engineers is what their success truly meant; hundreds of thousands of innocent lives obliterated."
+    # query = "why was the Manhatten project succesful"
+    # _, _ = bert_next_sentence(query, passage)
+    #
+    # passage = "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was."
+    # query = "why was the Manhatten project succesful"
+    # _, _ = bert_next_sentence(query, passage)
+    #
+    # passage = "I bought a gallon of milk."
+    # query = "This afternoon I went to the store."
+    # _, _ = bert_next_sentence(query, passage)
+    #
+    # query = "In Italy, pizza served in formal settings, such as at a restaurant, is presented unsliced."
+    # passage = "The sky is blue due to the shorter wavelength of blue light."
+    # _, _ = bert_next_sentence(query, passage)
+    #
+    # query = 'I like cookies !'
+    # passage = 'Do you like them ?'
+    # _, _ = bert_next_sentence(query, passage)
+
+    create_feature_file()
