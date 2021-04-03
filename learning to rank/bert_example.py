@@ -75,7 +75,7 @@ def create_feature_file():
         prob_continue = round(float(probs.data[0][0]), 4)
         prob_random = round(float(probs.data[0][1]), 4)
 
-        if i % 10 == 0:
+        if i % 1000 == 0:
             print(i)
             print('Prompt: ' + query)
             print('Next: ' + passage)
