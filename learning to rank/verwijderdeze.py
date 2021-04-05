@@ -10,7 +10,7 @@ def formatGlove():
     ixQ = open_dir('../index/indexdir', schema=schemaQ)
 
     i = 0
-    trainingFile = open("output/qrels-passcollection.txt", "a", newline='', encoding='utf8')
+    trainingFile = open("../data/qrels-passcollection.txt", "a", newline='', encoding='utf8')
     for line in list(open("../data/2019qrels-pass.txt", encoding='utf8')):
         print(line)
         # i = i + 1
