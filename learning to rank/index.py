@@ -3,9 +3,9 @@ from whoosh.fields import *
 import os
 
 if __name__ == '__main__':
-    fileName = "qrels-index"
+    fileName = "extended.passages.dev.small-index"
     newFile = "../index/" + fileName
-    openFile = "../data/qrels-passcollection.txt"
+    openFile = "../collectionandqueries/extended.passages.dev.small.tsv"
 
     schema = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
     ix = create_in(newFile, schema)
