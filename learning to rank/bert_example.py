@@ -66,16 +66,16 @@ def create_feature_file():
     tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
 
     schemaQ = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ixQ = open_dir('../index/testindexdir', schema=schemaQ)
+    ixQ = open_dir('../index/training-queries-index', schema=schemaQ)
     schemaP = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ixP = open_dir('../index/qrels-index', schema=schemaP)
+    ixP = open_dir('../index/training-passages-index', schema=schemaP)
 
     i = 0
-    feature_file = open("output/new_bert_features.txt", "a", newline='')
-    for line in list(open("../data/2019qrels-pass.txt", encoding='utf8')):
-        queryID = line.split(' ')[0]
-        passageID = line.split(' ')[2]
-        relevance = int(line.split(' ')[3])
+    feature_file = open("output/training_set_bert_features.txt", "a", newline='')
+    for line in list(open("../collectionandqueries/extended.qrels.dev.small.tsv", encoding='utf8')):
+        queryID = line.split('\t')[0]
+        passageID = line.split('\t')[2]
+        relevance = int(line.split('\t')[3])
 
         qp = QueryParser('title', schema=ixQ.schema)
         q = qp.parse(queryID)
