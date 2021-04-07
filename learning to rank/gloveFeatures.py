@@ -47,6 +47,6 @@ def create_features(indexQ, indexP, outputfile, readfile):
 if __name__ == '__main__':
     indexQ = "fastqvector-index"
     indexP = "fastpvector-index"
-    outputfile = "fast_features.txt"
+    outputfile = "fast_features_testing.txt"
     readfile = "2019qrels-pass.txt"
     create_features(indexQ, indexP, outputfile, readfile)
