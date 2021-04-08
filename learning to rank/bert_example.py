@@ -128,16 +128,16 @@ def create_feature_file():
     albert_sentiment_tokenizer = AlbertTokenizer.from_pretrained('textattack/albert-base-v2-CoLA')
 
     schemaQ = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ixQ = open_dir('../index/training-queries-index', schema=schemaQ)
+    ixQ = open_dir('../index/testindexdir', schema=schemaQ)
     schemaP = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ixP = open_dir('../index/training-passages-index', schema=schemaP)
+    ixP = open_dir('../index/qrels-index', schema=schemaP)
 
     i = 0
-    feature_file = open("output/correct_training_set_bert_features.txt", "a", newline='')
-    for line in list(open("../collectionandqueries/extended.qrels.dev.small.tsv", encoding='utf8')):
-        queryID = line.split('\t')[0]
-        passageID = line.split('\t')[2]
-        relevance = int(line.split('\t')[3])
+    feature_file = open("output/correct_bert_features_testing.txt", "a", newline='')
+    for line in list(open("../../data/2019qrels-pass.txt", encoding='utf8')):
+        queryID = line.split(' ')[0]
+        passageID = line.split(' ')[2]
+        relevance = int(line.split(' ')[3])
 
         qp = QueryParser('title', schema=ixQ.schema)
         q = qp.parse(queryID)
@@ -212,7 +212,7 @@ def create_feature_file():
         albert_qp_prob_positive = round(float(sentiment_probs.data[0][0]), 4)
         albert_qp_prob_negative = round(float(sentiment_probs.data[0][1]), 4)
 
-        if i % 1000 == 0:
+        if i % 500 == 0:
             print(i)
             print('Query: ' + query)
             print('Passage: ' + passage)
@@ -247,25 +247,25 @@ def create_feature_file():
 
 
 if __name__ == '__main__':
-    passage = "I bought a gallon of milk."
-    query = "This afternoon I went to the store."
-    bert_next_sentence(query, passage)
+    # passage = "I bought a gallon of milk."
+    # query = "This afternoon I went to the store."
+    # bert_next_sentence(query, passage)
+    #
+    # query = "In Italy, pizza served in formal settings, such as at a restaurant, is presented unsliced."
+    # passage = "The sky is blue due to the shorter wavelength of blue light."
+    # bert_next_sentence(query, passage)
+    #
+    # query = 'Hello my dog is cute'
+    # passage = 'Do you like him too?'
+    # bert_sentiment(query, passage)
+    #
+    # query = 'I hate dogs'
+    # passage = 'What do you think of them?'
+    # bert_sentiment(query, passage)
+    #
+    # query = "why was the Manhatten project succesful"
+    # passage = "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was. The only cloud hanging over the impressive achievement of the atomic researchers and engineers is what their success truly meant; hundreds of thousands of innocent lives obliterated."
+    # bert_next_sentence(query, passage)
+    # bert_sentiment(query, passage)
 
-    query = "In Italy, pizza served in formal settings, such as at a restaurant, is presented unsliced."
-    passage = "The sky is blue due to the shorter wavelength of blue light."
-    bert_next_sentence(query, passage)
-
-    query = 'Hello my dog is cute'
-    passage = 'Do you like him too?'
-    bert_sentiment(query, passage)
-
-    query = 'I hate dogs'
-    passage = 'What do you think of them?'
-    bert_sentiment(query, passage)
-
-    query = "why was the Manhatten project succesful"
-    passage = "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was. The only cloud hanging over the impressive achievement of the atomic researchers and engineers is what their success truly meant; hundreds of thousands of innocent lives obliterated."
-    bert_next_sentence(query, passage)
-    bert_sentiment(query, passage)
-
-    # create_feature_file()
+    create_feature_file()
