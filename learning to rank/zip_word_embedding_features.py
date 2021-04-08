@@ -65,8 +65,8 @@ if __name__ == '__main__':
                     new_line_split.append(glove_cosine_param)
                     new_line_split.append(glove_euclidian_param)
 
-                    fasttext_cosine_param = glove_line.split(" ")[2].replace("1:", "6:")
-                    fasttext_euclidian_param = glove_line.split(" ")[3].replace("2:", "7:")
+                    fasttext_cosine_param = fasttext_line.split(" ")[2].replace("1:", "6:")
+                    fasttext_euclidian_param = fasttext_line.split(" ")[3].replace("2:", "7:")
                     new_line_split.append(fasttext_cosine_param)
                     new_line_split.append(fasttext_euclidian_param)
 
