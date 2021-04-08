@@ -2,175 +2,86 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import *
 from whoosh.qparser import QueryParser
 from rank_bm25 import BM25Okapi
+from random import randint
+
 
 def formatTraining():
+    # Open index for queries and passages
     schemaQ = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ixQ = open_dir('../index/dataindexdir', schema=schemaQ)
+    ixQ = open_dir('../index/queries.dev.small-index', schema=schemaQ)
 
-    i = 0
-    for line in list(open("../data/qrels.train.tsv", encoding='utf8')):
-        print(i)
-        i = i+1
-        queryID = line.split('\t')[0]
-        passageID = int(line.split('\t')[2])
-        qp = QueryParser('title', schema=ixQ.schema)
-        q = qp.parse(queryID)
+    schemaP = Schema(title=TEXT(stored=True), content=TEXT)
+    ixP = open_dir('../index/extended.passages.dev.small-index', schema=schemaP)
 
-        with ixQ.searcher() as s:
-            results = s.search(q)
-            query = results[0].get('content')
+    # Create corpus for calculating bm25
+    passages = []
+    for line in list(open("../collectionandqueries/extended.passages.dev.small.tsv", encoding='utf8')):
+        passages.append(str(line.split('\t')[1]).strip('\n'))
+    print('Passages are loaded in memory!')
 
-            collected = []
-            collectedID = []
-            passageLength = []
-            queryLength = len(query.split(" "))
+    # Keep track of track of current index with i
+    i = -1
+    score = []
 
-        with open('../data/collection.tsv', encoding='utf8') as collection2:
-            counter = 0
-            for passage2 in collection2:
-                checkID = int(passage2.split('\t')[0])
-                if checkID == passageID:
-                    collected.insert(0, passage2.split('\t')[1])
-                    collectedID.insert(0, checkID)
-                    passageLength.insert(0, len(passage2.split('\t')[1].split(" ")))
-                    counter = counter + 1
-                if checkID > passageID:
-                    collected.append(passage2.split('\t')[1])
-                    collectedID.append(passage2.split('\t')[0])
-                    passageLength.append(len(passage2.split('\t')[1].split(" ")))
-                    counter = counter + 1
-                if counter > 10000:
-                    break
+    # Open file to write baseline features to
+    trainingFile = open("output/baseline_feature.txt", 'a')
 
-        tokenized_corpus = [doc.split(" ") for doc in collected]
-        bm25 = BM25Okapi(tokenized_corpus)
-        tokenized_query = query.split(" ")
-        score = bm25.get_scores(tokenized_query)
-        trainingFile = open("output/train.txt", "a", newline='')
-        for num, trainingitem in enumerate(collectedID):
-            if num == 0:
-                trainingFile.write('1 qid:' + str(queryID) + ' 1:' + str(score[num]) + ' 2:' + str(passageLength[num]) + ' 3:' + str(queryLength) + ' #' + str(trainingitem) + '\n')
-            else:
-                trainingFile.write('0 qid:' + str(queryID) + ' 1:' + str(score[num]) + ' 2:' + str(passageLength[num]) + ' 3:' + str(queryLength) + ' #' + str(trainingitem) + '\n')
-            if num == 99:
-                break
-        trainingFile.close()
-        if i == 1000:
-            break
-
-def formatValidate():
-    schemaQ = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ixQ = open_dir('../index/dataindexdir', schema=schemaQ)
-
-    i = 0
-    for line in reversed(list(open("../data/qrels.train.tsv", encoding='utf8'))):
-        print(i)
-        i = i+1
-        queryID = line.split('\t')[0]
-        passageID = int(line.split('\t')[2])
-        qp = QueryParser('title', schema=ixQ.schema)
-        q = qp.parse(queryID)
-
-        with ixQ.searcher() as s:
-            results = s.search(q)
-            query = results[0].get('content')
-            collected = []
-            collectedID = []
-            passageLength = []
-            queryLength = len(query.split(" "))
-
-            with open('../data/collection.tsv', encoding='utf8') as collection2:
-                counter = 0
-                for passage2 in collection2:
-                    checkID = int(passage2.split('\t')[0])
-                    if checkID == passageID:
-                        collected.insert(0, passage2.split('\t')[1])
-                        collectedID.insert(0, checkID)
-                        passageLength.insert(0, len(passage2.split('\t')[1].split(" ")))
-                        counter = counter + 1
-                    if checkID > passageID:
-                        collected.append(passage2.split('\t')[1])
-                        collectedID.append(checkID)
-                        passageLength.append(len(passage2.split('\t')[1].split(" ")))
-                        counter = counter + 1
-                    if counter > 10:
-                        break
-                tokenized_corpus = [doc.split(" ") for doc in collected]
-                bm25 = BM25Okapi(tokenized_corpus)
-                tokenized_query = query.split(" ")
-                score = bm25.get_scores(tokenized_query)
-                print(collectedID)
-                trainingFile = open("output/validate.txt", "a", newline='')
-                for num, trainingitem in enumerate(collectedID):
-                    if num == 0:
-                        trainingFile.write('1 qid:' + str(queryID) + ' 1:' + str(score[num]) + ' 2:' + str(passageLength[num]) + ' 3:' + str(queryLength) + ' #' + str(trainingitem) + '\n')
-                    else:
-                        trainingFile.write('0 qid:' + str(queryID) + ' 1:' + str(score[num]) + ' 2:' + str(passageLength[num]) + ' 3:' + str(queryLength) + ' #' + str(trainingitem) + '\n')
-                    if num == 100:
-                        break
-                trainingFile.close()
-        if i == 100:
-            break
-
-def formatTesting():
-    schemaQ = Schema(title=TEXT(stored=True), content=TEXT(stored=True))
-    ixQ = open_dir('../index/dataindexdir', schema=schemaQ)
-
-    i = 0
-    j = 0
-    for line in reversed(list(open("../data/qrels.train.tsv", encoding='utf8'))):
-        print(i)
-        j = j+1
-        if j < 100:
-            continue
+    # Iterate over all items in extended.qrels.dev.small
+    for line in list(open("../data/extended.qrels.dev.small.tsv", encoding='utf8')):
         i = i + 1
-        queryID = line.split('\t')[0]
-        passageID = int(line.split('\t')[2])
+        queryID = str(line.split('\t')[0])
+        passageID = str(line.split('\t')[2])
+        relevancy = str(line.split('\t')[3])
+
+        # Search query text on queryID
         qp = QueryParser('title', schema=ixQ.schema)
         q = qp.parse(queryID)
-
         with ixQ.searcher() as s:
             results = s.search(q)
             query = results[0].get('content')
-            collected = []
-            collectedID = []
-            passageLength = []
-            queryLength = len(query.split(" "))
 
-            with open('../data/collection.tsv', encoding='utf8') as collection2:
-                counter = 0
-                for passage2 in collection2:
-                    checkID = int(passage2.split('\t')[0])
-                    if checkID == passageID:
-                        collected.insert(0, passage2.split('\t')[1])
-                        collectedID.insert(0, checkID)
-                        passageLength.insert(0, len(passage2.split('\t')[1].split(" ")))
-                        counter = counter + 1
-                    if checkID > passageID:
-                        collected.append(passage2.split('\t')[1])
-                        collectedID.append(checkID)
-                        passageLength.append(len(passage2.split('\t')[1].split(" ")))
-                        counter = counter + 1
-                    if counter > 10:
-                        break
-                tokenized_corpus = [doc.split(" ") for doc in collected]
-                bm25 = BM25Okapi(tokenized_corpus)
-                tokenized_query = query.split(" ")
-                score = bm25.get_scores(tokenized_query)
-                print(collectedID)
-                trainingFile = open("output/validate.txt", "a", newline='')
-                for num, trainingitem in enumerate(collectedID):
-                    if num == 0:
-                        trainingFile.write('1 qid:' + str(queryID) + ' 1:' + str(score[num]) + ' 2:' + str(passageLength[num]) + ' 3:' + str(queryLength) + ' #' + str(trainingitem) + '\n')
-                    else:
-                        trainingFile.write('0 qid:' + str(queryID) + ' 1:' + str(score[num]) + ' 2:' + str(passageLength[num]) + ' 3:' + str(queryLength) + ' #' + str(trainingitem) + '\n')
-                    if num == 100:
-                        break
-                trainingFile.close()
-        if i == 100:
-            break
+        # Search passage text on passageID
+        pp = QueryParser('title', schema=ixP.schema)
+        p = pp.parse(passageID)
+        with ixP.searcher() as s:
+            results = s.search(p)
+            passage = str(results[0].get('content'))
+
+        # Store information on query and passage length
+        queryLength = len(query.split(" "))
+        passageLength = len(passage.split(" "))
+        indexPassage = passages.index(passage)
+
+        # Only calculate the bm25 for all passages every 10 times, since the query changes after 10 trainingitems
+        if i%10 == 0:
+            tokenized_corpus = [doc.split(" ") for doc in passages]
+            bm25 = BM25Okapi(tokenized_corpus)
+            tokenized_query = query.split(" ")
+            score = bm25.get_scores(tokenized_query)
+
+        # Add training item to the file.
+        trainingitem = str(str(relevancy) +  ' qid:' + str(queryID) + ' 1:' + str(score[indexPassage]) + ' 2:' + str(passageLength) + ' 3:' + str(queryLength) + ' #' + str(passageID) + '\n')
+        trainingFile.write(str(trainingitem))
+
+    trainingFile.close()
+
 
 if __name__ == '__main__':
-    # formatTraining()
-    formatValidate()
-    # formatTesting()
+    formatTraining()
+
+
+
+
+
+    # # Generate 9 random passageIDs
+    #
+    # while len(passageIDs) < 10:
+    #     randomID = randint(0, 8841823)
+    #     if not randomID == passageID:
+    #         passageIDs.append(randomID)
+    #
+    # for num, trainingitem in enumerate(passageIDs):
+    #     if num == 0:
+    #         trainingFile.write(str(queryID) + '\t0\t' + str(passageIDs[num]) + '\t1' + '\n')
+    #     else:
+    #         trainingFile.write(str(queryID) + '\t0\t' + str(passageIDs[num]) + '\t0' + '\n')
