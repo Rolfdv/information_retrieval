@@ -2,7 +2,7 @@
 
 if __name__ == '__main__':
     # Read feature files
-    bert_feature_index_start = open('output/new_bert_features.txt', 'r')
+    bert_feature_index_start = open('output/test_set_bert_features.txt', 'r')
     main_features = open('output/features.txt', 'r')
     word_feature_index_start = open('output/word_distance_features.txt', 'r')
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
             bert_start = bert_feature_index_start + i
             res_pos = res_feature_index_start + i
 
-            feature = bert_line[bert_start][2:]
+            feature = bert_line[bert_start].split(':')[1]
             bert_feature_line = bert_feature_line + ' {}:{}'.format(res_pos, feature)
 
         main_feature_line = main_line[0] + ' ' + main_line[1] + ' ' + main_line[2] + ' ' + main_line[3] + ' ' + main_line[4]
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             word_start = word_feature_index_start + i
             res_pos = res_feature_index_start + i
 
-            feature = word_line[word_start][2:]
+            feature = word_line[word_start].split(':')[1]
             word_feature_line = word_feature_line + ' {}:{}'.format(res_pos, feature)
 
         res_line = main_feature_line + bert_feature_line + word_feature_line + ' #' + main_passage_id
