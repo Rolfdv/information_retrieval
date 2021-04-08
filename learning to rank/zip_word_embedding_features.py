@@ -35,7 +35,7 @@ if __name__ == '__main__':
                     glove_features_by_qid[qid_val] = []
                 glove_features_by_qid[qid_val].append(line)
 
-    with open("../featuresets/training/combined_feature_file.txt", "w+") as res_file:
+    with open("../featuresets/training/baseline_glove_fasttext_features_training.txt", "w+") as res_file:
         for key in baseline_features_by_qid.keys():
             if key in fasttext_features_by_qid.keys() and key in glove_features_by_qid:
                 baseline_lines = baseline_features_by_qid[key]

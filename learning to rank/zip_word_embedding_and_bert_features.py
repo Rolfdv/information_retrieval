@@ -25,7 +25,7 @@ if __name__ == '__main__':
                 bert_features_by_qid[qid_val].append(line)
 
 
-    with open("../featuresets/training/mega_combined_feature_file.txt", "w+") as res_file:
+    with open("../featuresets/training/baseline_glove_fasttext_bert_features_training.txt", "w+") as res_file:
         for key in baseline_glove_fasttext_features_training_by_qid.keys():
             if key in bert_features_by_qid.keys():
                 baseline_lines = baseline_glove_fasttext_features_training_by_qid[key]
