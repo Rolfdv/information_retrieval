@@ -40,7 +40,9 @@ def create_features(indexQ, indexP, outputfile, readfile):
             continue
 
         qvector = np.array(list(map(float, queries.get(queryID).strip('[').strip(']').split(', '))))
+        qvector[qvector == 0] = 0.0000000000000001
         pvector = np.array(list(map(float, passages.get(passageID).strip('[').strip(']').split(', '))))
+        pvector[pvector == 0] = 0.0000000000000001
 
         cosine = scipy.spatial.distance.cosine(qvector, pvector)
         euclidian = np.linalg.norm(qvector - pvector)
@@ -54,9 +56,9 @@ def create_features(indexQ, indexP, outputfile, readfile):
 
 
 if __name__ == '__main__':
-    indexQ = "word_embeddings/fasttext_scripts/7500queries_fasttext_embedding.txt"
-    indexP = "word_embeddings/passages_fasttext_embedding.txt"
-    outputfile = "training/fast_features_training.txt"
+    indexQ = "word_embeddings/glove_scripts/7500queries_glove_embedding.txt"
+    indexP = "word_embeddings/passages_glove_embedding.txt"
+    outputfile = "training/glove_features_training.txt"
     readfile = "extended.qrels.dev.small.tsv"
     create_features(indexQ, indexP, outputfile, readfile)
 
