@@ -1,9 +1,20 @@
 
 
 if __name__ == '__main__':
+    # ZIP TRAINING DATA
+    # baseline_features_doc = '../featuresets/training/baseline_features_training.txt'
+    # fasttext_features_doc = '../featuresets/training/fast_features_training.txt'
+    # glove_features_doc = '../featuresets/training/glove_features_training.txt'
+    # result_file = "../featuresets/training/baseline_glove_fasttext_features_training.txt"
+    # ZIP TESTING DATA
+    baseline_features_doc = '../featuresets/testing/baseline_features_testing.txt'
+    fasttext_features_doc = '../featuresets/testing/fast_features_testing.txt'
+    glove_features_doc = '../featuresets/testing/glove_features_testing.txt'
+    result_file = "../featuresets/testing/baseline_glove_fasttext_features_testing.txt"
+
     # Read feature files
     baseline_features_by_qid = {}
-    with open('../featuresets/training/baseline_features_training.txt') as baseline_features_file:
+    with open(baseline_features_doc) as baseline_features_file:
         for line in baseline_features_file:
             line = line.replace("\n", "")
             if line:
@@ -14,7 +25,7 @@ if __name__ == '__main__':
                 baseline_features_by_qid[qid_val].append(line)
 
     fasttext_features_by_qid = {}
-    with open('../featuresets/training/fast_features_training.txt') as fasttext_features_file:
+    with open(fasttext_features_doc) as fasttext_features_file:
         for line in fasttext_features_file:
             line = line.replace("\n", "")
             if line:
@@ -25,7 +36,7 @@ if __name__ == '__main__':
                 fasttext_features_by_qid[qid_val].append(line)
 
     glove_features_by_qid = {}
-    with open('../featuresets/training/glove_features_training.txt') as glove_features_file:
+    with open(glove_features_doc) as glove_features_file:
         for line in glove_features_file:
             line = line.replace("\n", "")
             if line:
@@ -35,7 +46,7 @@ if __name__ == '__main__':
                     glove_features_by_qid[qid_val] = []
                 glove_features_by_qid[qid_val].append(line)
 
-    with open("../featuresets/training/baseline_glove_fasttext_features_training.txt", "w+") as res_file:
+    with open(result_file, "w+") as res_file:
         for key in baseline_features_by_qid.keys():
             if key in fasttext_features_by_qid.keys() and key in glove_features_by_qid:
                 baseline_lines = baseline_features_by_qid[key]

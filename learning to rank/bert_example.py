@@ -1,11 +1,10 @@
 from torch.nn.functional import softmax
-from transformers import BertForNextSentencePrediction, BertTokenizer, BertForSequenceClassification
-from whoosh.index import create_in,open_dir
+from transformers import BertForNextSentencePrediction, BertTokenizer
+from whoosh.index import open_dir
 from whoosh.fields import *
 from whoosh.qparser import QueryParser
 import time
 import torch
-from transformers import pipeline
 from transformers import AlbertTokenizer, AlbertForSequenceClassification
 from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
 
@@ -133,8 +132,8 @@ def create_feature_file():
     ixP = open_dir('../index/qrels-index', schema=schemaP)
 
     i = 0
-    feature_file = open("output/correct_bert_features_testing.txt", "a", newline='')
-    for line in list(open("../../data/2019qrels-pass.txt", encoding='utf8')):
+    feature_file = open("../featuresets/testing/bert_features_testing.txt", "a", newline='')
+    for line in list(open("../data/2019qrels-pass.txt", encoding='utf8')):
         queryID = line.split(' ')[0]
         passageID = line.split(' ')[2]
         relevance = int(line.split(' ')[3])
@@ -247,25 +246,25 @@ def create_feature_file():
 
 
 if __name__ == '__main__':
-    # passage = "I bought a gallon of milk."
-    # query = "This afternoon I went to the store."
-    # bert_next_sentence(query, passage)
-    #
-    # query = "In Italy, pizza served in formal settings, such as at a restaurant, is presented unsliced."
-    # passage = "The sky is blue due to the shorter wavelength of blue light."
-    # bert_next_sentence(query, passage)
-    #
-    # query = 'Hello my dog is cute'
-    # passage = 'Do you like him too?'
-    # bert_sentiment(query, passage)
-    #
-    # query = 'I hate dogs'
-    # passage = 'What do you think of them?'
-    # bert_sentiment(query, passage)
-    #
-    # query = "why was the Manhatten project succesful"
-    # passage = "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was. The only cloud hanging over the impressive achievement of the atomic researchers and engineers is what their success truly meant; hundreds of thousands of innocent lives obliterated."
-    # bert_next_sentence(query, passage)
-    # bert_sentiment(query, passage)
+    passage = "I bought a gallon of milk."
+    query = "This afternoon I went to the store."
+    bert_next_sentence(query, passage)
+
+    query = "In Italy, pizza served in formal settings, such as at a restaurant, is presented unsliced."
+    passage = "The sky is blue due to the shorter wavelength of blue light."
+    bert_next_sentence(query, passage)
+
+    query = 'Hello my dog is cute'
+    passage = 'Do you like him too?'
+    bert_sentiment(query, passage)
+
+    query = 'I hate dogs'
+    passage = 'What do you think of them?'
+    bert_sentiment(query, passage)
+
+    query = "why was the Manhatten project succesful"
+    passage = "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was. The only cloud hanging over the impressive achievement of the atomic researchers and engineers is what their success truly meant; hundreds of thousands of innocent lives obliterated."
+    bert_next_sentence(query, passage)
+    bert_sentiment(query, passage)
 
     create_feature_file()

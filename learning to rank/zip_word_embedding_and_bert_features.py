@@ -1,9 +1,18 @@
 
 
 if __name__ == '__main__':
+    # ZIP TRAINING DATA
+    # previous_result_file = "../featuresets/training/baseline_glove_fasttext_features_training.txt"
+    # bert_features_doc = '../featuresets/training/bert_features_training.txt'
+    # result_file = "../featuresets/model/training.txt"
+    # ZIP TESTING DATA
+    previous_result_file = "../featuresets/testing/baseline_glove_fasttext_features_testing.txt"
+    bert_features_doc = '../featuresets/testing/bert_features_testing.txt'
+    result_file = "../featuresets/learning_to_rank/testing.txt"
+
     # Read feature files
     baseline_glove_fasttext_features_training_by_qid = {}
-    with open('../featuresets/training/baseline_glove_fasttext_features_training.txt') as baseline_glove_fasttext_features_training:
+    with open(previous_result_file) as baseline_glove_fasttext_features_training:
         for line in baseline_glove_fasttext_features_training:
             line = line.replace("\n", "")
             if line:
@@ -14,7 +23,7 @@ if __name__ == '__main__':
                 baseline_glove_fasttext_features_training_by_qid[qid_val].append(line)
 
     bert_features_by_qid = {}
-    with open('../featuresets/training/bert_features_training.txt') as bert_features_file:
+    with open(bert_features_doc) as bert_features_file:
         for line in bert_features_file:
             line = line.replace("\n", "")
             if line:
@@ -24,8 +33,7 @@ if __name__ == '__main__':
                     bert_features_by_qid[qid_val] = []
                 bert_features_by_qid[qid_val].append(line)
 
-
-    with open("../featuresets/training/baseline_glove_fasttext_bert_features_training.txt", "w+") as res_file:
+    with open(result_file, "w+") as res_file:
         for key in baseline_glove_fasttext_features_training_by_qid.keys():
             if key in bert_features_by_qid.keys():
                 baseline_lines = baseline_glove_fasttext_features_training_by_qid[key]
