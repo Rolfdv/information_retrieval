@@ -1,14 +1,14 @@
 import random
 import numpy as np
 
+# This method takes a file and creates a k-fold cross validation.
 if __name__ == '__main__':
     random.seed(20)
     number_of_folds = 5
-    file_base = 'own/iter3'
+    file_base = 'own/iter4'
 
     # Open the file
-    # file = open('own/iter4/base_features.txt', 'r')
-    file_source = file_base + '/test.txt'
+    file_source = file_base + '/crosstrain.txt'
     file = open(file_source, 'r')
     lines = file.readlines()
     query_ids = []

@@ -1,4 +1,3 @@
-
 # Please ensure bin/RankLib-2.15.jar is present.
 # Useful website for running: https://sourceforge.net/p/lemur/wiki/RankLib%20How%20to%20use/
 base_train_query = "java -jar bin/RankLib-2.15.jar -train learning_to_rank/data/training.txt -test learning_to_rank/data/testing.txt -ranker 1 -metric2t NDCG@10 -feature learning_to_rank/feature_spec_models/model_01.txt -save learning_to_rank/models/model_01.txt -epoch 100"

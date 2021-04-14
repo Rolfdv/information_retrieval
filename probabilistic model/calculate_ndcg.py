@@ -25,6 +25,7 @@ with open("../data/2019qrels-pass.txt") as inf:
             # Store dict back in dict
             per_query_per_relevancy_rating_list_of_passages[qid] = relevancy_ratings_lists_of_passages
 
+# Define log base and NDCG@X
 log_base = 2
 ndcg_at_number = 10
 
@@ -37,6 +38,7 @@ with open("../data/results_msmarco-test2019-queries.tsv") as results_file:
             if qid in per_query_per_relevancy_rating_list_of_passages.keys():
                 print(qid)
 
+                # Calculate the ideal DCG vector for this query
                 ideal_vector = []
                 keys = ['3', '2', '1', '0']
                 for key in keys:
@@ -66,8 +68,8 @@ with open("../data/results_msmarco-test2019-queries.tsv") as results_file:
                         value = ideal_cumulative_vector[i]
                     ideal_discounted_cumulative_vector.append(value)
 
+                # Using the ideal DCG vector, calculate the NDCG@10 vector
                 gain_vector = []
-
                 relevancy_ratings_lists_of_passages = per_query_per_relevancy_rating_list_of_passages[qid]
 
                 list_of_passages_and_score = ast.literal_eval(list_of_passages_and_score)
@@ -108,6 +110,7 @@ with open("../data/results_msmarco-test2019-queries.tsv") as results_file:
                 for i in range(len(discounted_cumulative_gain_vector)):
                     ndcg_vector.append(discounted_cumulative_gain_vector[i] / ideal_discounted_cumulative_vector[i])
 
+                # Store NDCG values
                 with open("improve_OR_ndcg_results.txt", "a+") as outfile:
                     try:
                         outfile.write(f"{qid}\t{ndcg_vector[-1]}\t{ndcg_vector}\n")
